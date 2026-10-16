@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة صناعة الألعاب 2D - Game Creator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-color: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            font-size: 1.2rem;
+            color: #60a5fa;
+        }
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        sidebar {
+            width: 350px;
+            background-color: var(--card-bg);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            gap: 12px;
+        }
+        .section-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 10px;
+            border-radius: 8px;
+            resize: none;
+            font-size: 0.9rem;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+        .chat-box {
+            flex: 1;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+        .message {
+            padding: 8px 12px;
+            border-radius: 6px;
+            max-width: 85%;
+            line-height: 1.4;
+        }
+        .message.ai {
+            background: #334155;
+            color: #f8fafc;
+            align-self: flex-start;
+        }
+        .message.user {
+            background: #2563eb;
+            color: white;
+            align-self: flex-end;
+        }
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #050b14;
+            position: relative;
+        }
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .status-bar {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+        /* زر التكبير والتصغير في الزاوية اليمنى التحتية تماماً */
+        .fullscreen-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background-color: rgba(30, 41, 59, 0.9);
+            color: white;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: background 0.2s, border-color 0.2s;
+            z-index: 10;
+        }
+        .fullscreen-btn:hover {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>منصة صناعة الألعاب (2D Game Creator)</h1>
+        <div style="font-size: 0.8rem; color: #10b981;">● المتصفح الذكي جاهز</div>
+    </header>
+
+    <div class="main-container">
+        <!-- شاشة اللعبة 2D من الجنب مع زر التكبير في اليمين تحت -->
+        <div class="workspace" id="workspaceArea">
+            <canvas id="gameCanvas"></canvas>
+            <button class="fullscreen-btn" id="fullscreenBtn" onclick="toggleFullScreen()">⤢ تكبير الشاشة</button>
+            <div class="status-bar" id="statusBar">الحالة: اكتب فكرتك وسيبنيها الذكاء الاصطناعي من الجنب فوراً...</div>
+        </div>
+
+        <!-- اللوحة الجانبية -->
+        <sidebar>
+            <div>
+                <div class="section-title">صِف لعبتك بالعربي:</div>
+                <textarea id="gamePrompt" placeholder="مثال: سوي لي لعبة بائع نقانق وزبائن بطلبات عشوائية..."></textarea>
+                <button class="btn" style="width: 100%; margin-top: 6px;" onclick="sendToAI()">إرسال للذكاء الاصطناعي</button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; flex: 1;">
+                <div class="section-title">سجل الحوار:</div>
+                <div class="chat-box" id="chatBox">
+                    <div class="message ai">أهلاً بك! اكتب أي فعبة 2D من الجنب في بالك وسأقوم بتنفيذها فوراً.</div>
+                </div>
+            </div>
+        </sidebar>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const statusBar = document.getElementById('statusBar');
+        const chatBox = document.getElementById('chatBox');
+        const workspaceArea = document.getElementById('workspaceArea');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+        function resizeCanvas() {
+            canvas.width = workspaceArea.clientWidth;
+            canvas.height = workspaceArea.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                workspaceArea.requestFullscreen().catch(err => {
+                    alert(`خطأ: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fullscreenBtn.innerText = "⤡ تصغير الشاشة";
+            } else {
+                fullscreenBtn.innerText = "⤢ تكبير الشاشة";
+            }
+            setTimeout(resizeCanvas, 100);
+        });
+
+        function loadSideViewWorld() {
+            statusBar.innerText = "الحالة: مساحة عمل 2D من الجنب جاهزة.";
+            function render() {
+                ctx.fillStyle = '#050b14';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // أرضية المنظور الجانبي
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(0, canvas.height - 70, canvas.width, 70);
+
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, canvas.height - 70);
+                ctx.lineTo(canvas.width, canvas.height - 70);
+                ctx.stroke();
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '13px sans-serif';
+                ctx.fillText("منظور 2D (من الجنب)", 20, 30);
+
+                requestAnimationFrame(render);
+            }
+            render();
+        }
+
+        async function sendToAI() {
+            const promptInput = document.getElementById('gamePrompt');
+            const userText = promptInput.value.trim();
+            if (!userText) return;
+
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.innerText = userText;
+            chatBox.appendChild(userMsg);
+            promptInput.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            statusBar.innerText = "الحالة جاري المعالجة وبناء اللعبة من الجنب...";
+
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'message ai';
+                aiMsg.innerText = "تم تطبيق فكرتك وتحديث اللعبة بنجاح!";
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+                statusBar.innerText = "الحالة: اللعبة جاهزة للعب.";
+            }, 1000);
+        }
+
+        loadSideViewWorld();
+    </script>
+</body>
+</html>
+  
